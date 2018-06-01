@@ -1,6 +1,8 @@
 from os import path, listdir, makedirs
 
-from cv2 import imread, VideoCapture, CAP_PROP_FPS, imwrite, VideoWriter, VideoWriter_fourcc, waitKey
+import numpy as np
+from cv2 import imread, VideoCapture, CAP_PROP_FPS, imwrite, VideoWriter, VideoWriter_fourcc, waitKey, calcHist
+from sklearn.cluster import KMeans
 
 
 class Clustering:
@@ -19,12 +21,9 @@ class Clustering:
         fps = int(video_cap.get(CAP_PROP_FPS))
         count = 0
         success = True
-        cont_aux = 0
         while success:
             success, image = video_cap.read()
-            if count % fps == 0:
-                cont_aux += 1
-                imwrite(path.join(input_path, 'frame%03d.jpg' % cont_aux), image)
+            imwrite(path.join(input_path, 'frame%05d.jpg' % count), image)
             count += 1
 
     @staticmethod
@@ -50,20 +49,62 @@ class Clustering:
 
     @staticmethod
     def __get_key_frames(input_path, t, k, h):
-        # list_frames = {}
+        list_frames = {}
+        aux = []
         n = len(listdir(input_path))
         f = 1
-        list_frames = []
-        for image in sorted(listdir(input_path)):
-            if f == 1 or f <= n:
-                list_frames.append(image)
+        for i, image in enumerate(sorted(listdir(input_path))):
+            if f == 1 or (i == f and f <= n):
+                img_path = path.join(input_path, image)
+                img = imread(img_path)
+                hist = calcHist([img.ravel()], [0], None, [256], h)
+                hist_b = calcHist([img], [0], None, [256], [0, 256])
+                hist_g = calcHist([img], [1], None, [256], [0, 256])
+                hist_r = calcHist([img], [2], None, [256], [0, 256])
+                # print(hist_b)
+                for index in range(len(hist_r)):
+                    m = (hist_b.item(index) + hist_g.item(index) + hist_r.item(index)) / 3.0
+                    hist[index] = m
+                ne = np.concatenate(list(hist))
+                list_frames[image] = hist
+                aux.append(list(ne))
                 f += t
-        return list_frames
+        print(len(aux))
+        kmeans = KMeans(n_clusters=k, random_state=0).fit(aux)
+        # print(kmeans.labels_)
+        res = {i: np.where(kmeans.labels_ == i)[0] for i in range(kmeans.n_clusters)}
+        # print(res) #GRUPO E INDICE DE LA FOTO
+        res2 = {}
+        for i, r in res.items():
+            print("======================")
+            print(len(r))
+            print("======================")
+            print("")
 
-    @staticmethod
-    def __k_medias(list_frames, k):
-        pass
+            aux2 = []
+            for x in r:
+                aux2.append(np.linalg.norm(aux[x] - kmeans.cluster_centers_[i]))
+            res2[i] = aux2
+        # print(res.items())
+        ids = []
+        for i, val in enumerate(res2.items()):
+            print()
+            print(val[1])
+            print(len(val[1]))
+            print(min(val[1]))
+            print(val[1].index(min(val[1])))
+            ids.append(val[1].index(min(val[1])))
+            # print(sorted(val[1][1])[0])
+        # print(len(ids))
+        frames = []
+        for i, r in enumerate(res.items()):
+            print("*****************")
+            print("ID: " + str(ids[i]) + " de " + str(len(r[1])))
+            print(r[1][ids[i]])
+            print(list(list_frames.keys())[r[1][ids[i]]])
+            frames.append(list(list_frames.keys())[r[1][ids[i]]])
+            print()
+            # print(type(r[1]))
+            # print(r[1][id])
 
-    @staticmethod
-    def __calculate_centroid_classes(list_frames_classified, k):
-        pass
+        return frames

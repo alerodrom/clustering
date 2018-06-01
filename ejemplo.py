@@ -1,4 +1,6 @@
 from clustering import Clustering
 
 my_clustering = Clustering()
-my_clustering.start('video.mp4', 'input', 'output', 2, 3, [0, 256])
+my_clustering.start('video.mp4', 'input', 'output', 100, 15, [0, 256])
+
+# 100, 20
