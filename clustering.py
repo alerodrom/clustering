@@ -130,8 +130,8 @@ class Clustering:
         :param list_frames: Diccionario que almacena como clave el nombre del fotograma y el valor del histograma
         :return: Devolvemos el listado de fotogramas clave y fotogramas para generar el video resumen
         """
-        frames_video = []
         key_frames = []
+        frames_video = []
         items = sorted(listdir('input'))
         # Recorremos cada cluster
         for i, r in enumerate(res.items()):

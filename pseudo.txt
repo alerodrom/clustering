@@ -1,0 +1,45 @@
+__get_key_frames: Dada una secuencia de N fotogramas en la carpeta INPUTPATH y los parámetros T, K y H.
+    list_frames ← Diccionario vacío
+    hist_all ← Lista vacía
+    Para cada fotograma en INPUTPATH, f=1, f<=N, f+=T
+        hist ← __hist_average(IMG, H)
+        En hist_all añadimos hist
+        Actualizamos list_frames con clave el nombre del fotograma y hist
+    kmeans ← KMeans(K, hist_all)
+    res ← Diccionario donde la clave es número del cluster y valores los elementos del cluster
+    distances_cluster ← __get_distance(res, kmeans, hist_all)
+    ids ← __get_min(distances_cluster)
+    Devolvemos __get_frames_near(res, ids, list_frames)
+
+__hist_average: Dada una imagen y H
+    hist ← Diccionario vacío
+    hist_b ← calcHist([img], [0], None, [256], h)
+    hist_g ← calcHist([img], [1], None, [256], h)
+    hist_r ← calcHist([img], [2], None, [256], h)
+    Para todos los elementos en la longitud de hist
+        hist ← (hist_b + hist_g + hist_r) / 3
+    ** calcHist es un método de la librería cv2
+    Devolvemos la media del histograma de la imagen
+
+__get_distance: Dada un diccionario con los ids de para cada cluster (values), kmeans, y un listado con el valor de todos los histogramas (hist_all)
+    res ← Diccionario vacio
+    Para cada item i de values
+        Obtenemos la distancia normal entre cada elemento del cluster y el centroide de kmeans
+        aux ← hist_all[i] - kmeans.centroide[i]
+        Actualizamos res con la clave del cluster y las distancias de cada elemento
+    Devolvemos res
+
+__get_min: Dada un diccionario con las distancias de cada cluster.
+    ids ← Lista vacía
+    Para cada elemento e de lista
+        ids ← Obtiene el valor mínimo y almacenamos su indice en la lista
+    Devolvemos ids
+
+__get_frames_near: Dado un diccionario con los ids de para cada cluster (res), una lista de ids y list_frames
+    key_frames ← Lista vacía
+    frames_video ← Lista vacía
+    items ← Lista de imágenes en INPUTPATH
+    Para cada cluster en res
+        key_frame ← Obtenemos el nombre del fotograma de list_frame con el id correspondiente al cluster en el que se encuntra la iteración
+        frames_videos ← Añadimos 4*Número de elementos del cluster de imagenes por la izquierda y derecha del fotograma clave
+    Devolvemos key_frame y frames_videos
