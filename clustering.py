@@ -18,12 +18,12 @@ class Clustering:
         :param frames_video_path: Ruta donde se añadirán los fotogramas para generar el video resumen
         :param t: Número de fotogramas a saltar
         :param k: Número de grupos para k-means
-        :param h: Tmañano del histográma generado
+        :param h: Tamaño del histográma generado
         """
         # Inicializamos la clase Frames
         frames = Frames()
         # Obtenemos los fotogramas del video
-        # frames.get_frames_from_video(video, input_path)
+        frames.get_frames_from_video(video, input_path)
         # Obtenemos fotogramas clave y fotogramas para generar el video
         key_frames, frames_video = self.__get_key_frames(input_path, t, k, h)
         # Movemos los fotogramas a sus respectivas carpetas
