@@ -27,3 +27,5 @@ Para ejecutar el programa pondriamos lo siguiente:
     python3 start.py
 
 Tras ejecutar el programa obtendríamos lo siguiente. En la `carpeta raiz` tendríamos el video resumen, en la carpeta `input` tendríamos los fotogramas del video, en `output` los fotogramas clave y en `frames_videos` estarán los fotogramas que se han usado para generar el vídeo.
+
+Nota: Para volver a ejecutar las pruebas se deben de eliminar los fotogramas de las carpetas `input`, `output` y `frames_videos`.
